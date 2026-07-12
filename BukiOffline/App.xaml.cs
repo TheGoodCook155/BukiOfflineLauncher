@@ -12,10 +12,11 @@ namespace BukiOffline
     public partial class App : Application
     {
         private Iinstaller pythonInstaller;
-
+        private UnzipCoreProject unzipCoreProject;
         private void Init() 
         {
             this.pythonInstaller = new PythonInstaller();
+            this.unzipCoreProject = new UnzipCoreProject();
         }
         protected override void OnStartup(StartupEventArgs e)
         {
@@ -25,7 +26,7 @@ namespace BukiOffline
 
             var prerequisitesChecker = new PrerequisitesChecker(this.pythonInstaller);
 
-            var mainViewModel = new MainViewModel(prerequisitesChecker);
+            var mainViewModel = new MainViewModel(prerequisitesChecker,this.unzipCoreProject);
 
             var mainWindow = new MainWindow
             {
