@@ -16,7 +16,7 @@
 
         <StackPanel >
             <StackPanel Orientation="Horizontal">
-                <Label Content="{Binding DownloadMessage}" MinWidth="120" Width="150"/>
+                <Label Content="{Binding DownloadMessage}" MinWidth="120" Width="180"/>
                 <Label Content="{Binding DownloadPercent}" MinWidth="100"/>
             </StackPanel>
 

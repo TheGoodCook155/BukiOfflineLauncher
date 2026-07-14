@@ -12,7 +12,19 @@ namespace BukiOffline.ViewModels
 
         private DownloadCoreProjectService downloadCoreProjectService;
 
-        public bool ExtractProjectVisibility { get; set; }
+        private bool extractProjectVisibility;
+        public bool ExtractProjectVisibility 
+        {
+            get => this.extractProjectVisibility;
+            set 
+            {
+                if (this.extractProjectVisibility != value)
+                {
+                    this.extractProjectVisibility = value;
+                    OnPropertyChanged(nameof(this.ExtractProjectVisibility));
+                }
+            }
+        }
 
         private string unzipMessage = "Extracting project";
         public string UnzipMessage
@@ -105,11 +117,7 @@ namespace BukiOffline.ViewModels
 
             var messageProgressTask = MessageProgress(() => DownloadMessage, value => DownloadMessage = value, token);
            
-            //var downloadProjectTask = Task.Run(() =>
-            //{
-               await this.downloadCoreProjectService.DownloadCoreProject();
-            //});
-
+            await this.downloadCoreProjectService.DownloadCoreProject();
 
             cancellationTokenSource.Cancel();
 
@@ -123,6 +131,7 @@ namespace BukiOffline.ViewModels
             }
 
             DownloadMessage = DownloadMessage.Trim('.') + "... - Done!";
+            this.DownloadPercent = "100%";
         }
 
         private async Task UnzipProject()

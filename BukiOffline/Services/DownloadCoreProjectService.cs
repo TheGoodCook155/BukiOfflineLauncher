@@ -28,7 +28,7 @@ namespace BukiOffline.Services
 
             long totalBytes = response.Content.Headers.ContentLength ?? -1;
 
-            if (File.Exists(zipPath) && GetLocalFileLength(zipPath) == totalBytes)
+            if (Directory.Exists(this.extractedDirectory) || File.Exists(zipPath) && GetLocalFileLength(zipPath) == totalBytes)
             {
                 return;
             }
