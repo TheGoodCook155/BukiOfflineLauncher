@@ -7,9 +7,13 @@ namespace BukiOffline.ViewModels
     public class MainViewModel : ViewModelBase
     {
         private PrerequisitesChecker prerequisitesChecker;
-        string test;
 
         private UnzipCoreProject unzipCoreProject;
+
+        private DownloadCoreProjectService downloadCoreProjectService;
+
+        public bool ExtractProjectVisibility { get; set; }
+
         private string unzipMessage = "Extracting project";
         public string UnzipMessage
         {
@@ -24,14 +28,61 @@ namespace BukiOffline.ViewModels
             }
         }
 
-        public MainViewModel(PrerequisitesChecker prerequisitesChecker, UnzipCoreProject unzipCoreProject)
+        private string downloadMessage = "Downloading project";
+        public string DownloadMessage
+        {
+            get => this.downloadMessage;
+            set
+            {
+                if (this.downloadMessage != value)
+                {
+                    this.downloadMessage = value;
+                    OnPropertyChanged(nameof(this.DownloadMessage));
+                }
+            }
+        }
+
+        private string downloadPercent = "0.00";
+        public string DownloadPercent
+        {
+            get => this.downloadPercent;
+            set
+            {
+                if (this.downloadPercent != value)
+                {
+                    this.downloadPercent = value;
+                    OnPropertyChanged(nameof(this.DownloadPercent));
+                }
+            }
+        }
+
+        public MainViewModel(PrerequisitesChecker prerequisitesChecker,
+            UnzipCoreProject unzipCoreProject,
+            DownloadCoreProjectService downloadCoreProjectService)
         {
             this.prerequisitesChecker = prerequisitesChecker;
             this.unzipCoreProject = unzipCoreProject;
+            this.downloadCoreProjectService = downloadCoreProjectService;
+            this.Init();
+        }
+
+        private void Init() 
+        {
+            this.downloadCoreProjectService.OnDownloadedContentChanged -= DownloadCoreProjectService_OnDownloadedContentChanged;
+
+            this.downloadCoreProjectService.OnDownloadedContentChanged += DownloadCoreProjectService_OnDownloadedContentChanged;
+        }
+
+        private void DownloadCoreProjectService_OnDownloadedContentChanged(object? sender, EventArguments.DownloadedContentEventArgs e)
+        {
+            this.DownloadPercent = e.DownloadedSize + "%";
         }
 
         public async Task Launch()
         {
+
+            await DownloadCoreProject();
+
             await UnzipProject();
 
             bool launchResult = prerequisitesChecker.Check(ProcessesStartInfoHolder.ProcessStartInfoList);
@@ -46,8 +97,38 @@ namespace BukiOffline.ViewModels
 
         }
 
+        private async Task DownloadCoreProject() 
+        {
+            CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
+
+            CancellationToken token = cancellationTokenSource.Token;
+
+            var messageProgressTask = MessageProgress(() => DownloadMessage, value => DownloadMessage = value, token);
+           
+            //var downloadProjectTask = Task.Run(() =>
+            //{
+               await this.downloadCoreProjectService.DownloadCoreProject();
+            //});
+
+
+            cancellationTokenSource.Cancel();
+
+            try
+            {
+                await messageProgressTask;
+            }
+            catch (OperationCanceledException)
+            {
+
+            }
+
+            DownloadMessage = DownloadMessage.Trim('.') + "... - Done!";
+        }
+
         private async Task UnzipProject()
         {
+            ExtractProjectVisibility = true;
+
             CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
 
             CancellationToken token = cancellationTokenSource.Token;

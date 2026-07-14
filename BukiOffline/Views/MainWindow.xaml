@@ -4,12 +4,23 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:BukiOffline"
+        xmlns:converters="clr-namespace:BukiOffline.Converters"
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800">
+
+    <Window.Resources>
+        <converters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
+    </Window.Resources>
+
     <Grid>
 
         <StackPanel >
-            <Label Content="{Binding UnzipMessage}"/>
+            <StackPanel Orientation="Horizontal">
+                <Label Content="{Binding DownloadMessage}" MinWidth="120" Width="150"/>
+                <Label Content="{Binding DownloadPercent}" MinWidth="100"/>
+            </StackPanel>
+
+            <Label Content="{Binding UnzipMessage}"   Visibility="{Binding ExtractProjectVisibility, Converter={StaticResource BoolToVisibilityConverter}}"/>
         </StackPanel>
 
     </Grid>
