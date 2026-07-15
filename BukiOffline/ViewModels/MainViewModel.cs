@@ -26,6 +26,20 @@ namespace BukiOffline.ViewModels
             }
         }
 
+        private bool checkingDependenciesVisibility;
+        public bool CheckingDependenciesVisibility
+        {
+            get => this.checkingDependenciesVisibility;
+            set
+            {
+                if (this.checkingDependenciesVisibility != value)
+                {
+                    this.checkingDependenciesVisibility = value;
+                    OnPropertyChanged(nameof(this.CheckingDependenciesVisibility));
+                }
+            }
+        }
+
         private string unzipMessage = "Extracting project";
         public string UnzipMessage
         {
@@ -50,6 +64,20 @@ namespace BukiOffline.ViewModels
                 {
                     this.downloadMessage = value;
                     OnPropertyChanged(nameof(this.DownloadMessage));
+                }
+            }
+        }
+
+        private string checkingDependenciesMessage = "Checking Dependencies";
+        public string CheckingDependenciesMessage
+        {
+            get => this.checkingDependenciesMessage;
+            set
+            {
+                if (this.checkingDependenciesMessage != value)
+                {
+                    this.checkingDependenciesMessage = value;
+                    OnPropertyChanged(nameof(this.CheckingDependenciesMessage));
                 }
             }
         }
@@ -97,7 +125,8 @@ namespace BukiOffline.ViewModels
 
             await UnzipProject();
 
-            bool launchResult = prerequisitesChecker.Check(ProcessesStartInfoHolder.ProcessStartInfoList);
+            bool launchResult = await PrerequisitesChecker();
+            //bool launchResult = prerequisitesChecker.Check(ProcessesStartInfoHolder.ProcessStartInfoList);
 
             if (launchResult)
             {
@@ -107,6 +136,23 @@ namespace BukiOffline.ViewModels
 
             // log the error codes and manually resolve...
 
+        }
+
+        private async Task<bool> PrerequisitesChecker() 
+        {
+            CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
+
+            CancellationToken token = cancellationTokenSource.Token;
+
+            var messageProgressTask = MessageProgress(() => CheckingDependenciesMessage, value => CheckingDependenciesMessage = value, token);
+
+            bool launchResult = await prerequisitesChecker.Check(ProcessesStartInfoHolder.ProcessStartInfoList);
+
+            cancellationTokenSource.Cancel();
+
+            CheckingDependenciesMessage = CheckingDependenciesMessage.Trim('.') + "... - Done!";
+
+            return launchResult;
         }
 
         private async Task DownloadCoreProject() 

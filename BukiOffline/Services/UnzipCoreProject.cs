@@ -1,29 +1,30 @@
-﻿using System.IO;
+﻿using BukiOffline.Const;
+using System.IO;
 using System.IO.Compression;
 
 namespace BukiOffline.Services
 {
-    public class UnzipCoreProject : CoreProjectBaseClass
+    public class UnzipCoreProject
     {
         public void Unzip() 
         {
 
-            if (!File.Exists(zipPath))
+            if (!File.Exists(ProjectPath.ZipPath))
             {
                 return;
             }
 
-            if (Directory.Exists(this.extractedDirectory)) 
+            if (Directory.Exists(ProjectPath.ExtractedDirectory)) 
             {
-                Directory.Delete(this.extractedDirectory, true);
+                Directory.Delete(ProjectPath.ExtractedDirectory, true);
             }
 
-                ZipFile.ExtractToDirectory(zipPath, extractPath);
+                ZipFile.ExtractToDirectory(ProjectPath.ZipPath, ProjectPath.ExtractPath);
         }
 
         public void RemoveZip() 
         {
-            File.Delete(zipPath);
+            File.Delete(ProjectPath.ZipPath);
         }
 
     }

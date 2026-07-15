@@ -1,11 +1,12 @@
 ﻿
+using BukiOffline.Const;
 using BukiOffline.EventArguments;
 using System.IO;
 using System.Net.Http;
 
 namespace BukiOffline.Services
 {
-    public class DownloadCoreProjectService : CoreProjectBaseClass
+    public class DownloadCoreProjectService
     {
         public event EventHandler<DownloadedContentEventArgs> OnDownloadedContentChanged;
         
@@ -28,7 +29,7 @@ namespace BukiOffline.Services
 
             long totalBytes = response.Content.Headers.ContentLength ?? -1;
 
-            if (Directory.Exists(this.extractedDirectory) || File.Exists(zipPath) && GetLocalFileLength(zipPath) == totalBytes)
+            if (Directory.Exists(ProjectPath.ExtractedDirectory) || File.Exists(ProjectPath.ZipPath) && GetLocalFileLength(ProjectPath.ZipPath) == totalBytes)
             {
                 return;
             }
@@ -38,7 +39,7 @@ namespace BukiOffline.Services
             await using Stream input = await response.Content.ReadAsStreamAsync();
 
             await using FileStream output = new FileStream(
-                zipPath,
+                ProjectPath.ZipPath,
                 FileMode.Create,
                 FileAccess.Write,
                 FileShare.None,
