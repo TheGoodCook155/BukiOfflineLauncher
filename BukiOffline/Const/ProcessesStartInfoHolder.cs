@@ -5,7 +5,7 @@ namespace BukiOffline.Const
 {
     public static class ProcessesStartInfoHolder
     {
-        public static Dictionary<Dependency, ProcessStartInfo> ProcessStartInfoList = new Dictionary<Dependency, ProcessStartInfo>()
+        public static Dictionary<Dependency, ProcessStartInfo> DependencyProcessStartInfoList = new Dictionary<Dependency, ProcessStartInfo>()
         {
             {
                 Dependency.Python,
@@ -141,7 +141,5 @@ namespace BukiOffline.Const
                 }
             },
         };
-
-
     }
 }

@@ -11,5 +11,6 @@ namespace BukiOffline.Const
        public static string ExtractedDirectory = Path.Combine(CurrentDirectory, ExtractPath, "buki-updated");
        public static string VenvDirectory = Path.Combine(CurrentDirectory, ExtractPath, "buki-updated","venv");
        public static string SriptsDirectory = Path.Combine(CurrentDirectory, ExtractPath, "buki-updated","venv","Scripts");
+       public static string RunPy = Path.Combine("run.py");
     }
 }

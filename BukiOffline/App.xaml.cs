@@ -14,11 +14,13 @@ namespace BukiOffline
         private Iinstaller pythonInstaller;
         private UnzipCoreProject unzipCoreProject;
         private DownloadCoreProjectService downloadCoreProjectService;
+        private AppLauncher appLauncher;
         private void Init() 
         {
             this.pythonInstaller = new PythonInstaller();
             this.unzipCoreProject = new UnzipCoreProject();
             this.downloadCoreProjectService = new DownloadCoreProjectService();
+            this.appLauncher = new AppLauncher();   
         }
         protected override void OnStartup(StartupEventArgs e)
         {
@@ -30,7 +32,8 @@ namespace BukiOffline
 
             var mainViewModel = new MainViewModel(prerequisitesChecker,
                 this.unzipCoreProject,
-                this.downloadCoreProjectService);
+                this.downloadCoreProjectService,
+                this.appLauncher);
 
             var mainWindow = new MainWindow
             {

@@ -12,6 +12,8 @@ namespace BukiOffline.ViewModels
 
         private DownloadCoreProjectService downloadCoreProjectService;
 
+        private AppLauncher appLauncher;
+
         private bool extractProjectVisibility;
         public bool ExtractProjectVisibility 
         {
@@ -98,11 +100,13 @@ namespace BukiOffline.ViewModels
 
         public MainViewModel(PrerequisitesChecker prerequisitesChecker,
             UnzipCoreProject unzipCoreProject,
-            DownloadCoreProjectService downloadCoreProjectService)
+            DownloadCoreProjectService downloadCoreProjectService,
+            AppLauncher appLauncher)
         {
             this.prerequisitesChecker = prerequisitesChecker;
             this.unzipCoreProject = unzipCoreProject;
             this.downloadCoreProjectService = downloadCoreProjectService;
+            this.appLauncher = appLauncher;
             this.Init();
         }
 
@@ -120,22 +124,22 @@ namespace BukiOffline.ViewModels
 
         public async Task Launch()
         {
+            this.appLauncher.SetRunPyFile();//fix this using open file for file and CPU and GPU
 
             await DownloadCoreProject();
 
             await UnzipProject();
 
             bool launchResult = await PrerequisitesChecker();
-            //bool launchResult = prerequisitesChecker.Check(ProcessesStartInfoHolder.ProcessStartInfoList);
 
             if (launchResult)
             {
                 // launch the app
+                await appLauncher.LaunchApp();
                 return;
             }
 
             // log the error codes and manually resolve...
-
         }
 
         private async Task<bool> PrerequisitesChecker() 
@@ -146,7 +150,7 @@ namespace BukiOffline.ViewModels
 
             var messageProgressTask = MessageProgress(() => CheckingDependenciesMessage, value => CheckingDependenciesMessage = value, token);
 
-            bool launchResult = await prerequisitesChecker.Check(ProcessesStartInfoHolder.ProcessStartInfoList);
+            bool launchResult = await prerequisitesChecker.Check(ProcessesStartInfoHolder.DependencyProcessStartInfoList);
 
             cancellationTokenSource.Cancel();
 
