@@ -48,7 +48,7 @@ namespace BukiOffline
 
         protected override void OnExit(ExitEventArgs e)
         {
-            this.appLauncher.process.Kill();
+            this.appLauncher.process?.Kill();
             base.OnExit(e);
         }
     }

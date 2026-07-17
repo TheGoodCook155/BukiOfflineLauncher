@@ -3,7 +3,6 @@ using BukiOffline.Commands;
 using BukiOffline.Const;
 using BukiOffline.Services;
 using Microsoft.Win32;
-using System.Diagnostics;
 using System.Windows;
 using System.Windows.Input;
 
@@ -18,6 +17,20 @@ namespace BukiOffline.ViewModels
         private DownloadCoreProjectService downloadCoreProjectService;
 
         private AppLauncher appLauncher;
+
+        private bool appCanBeRestarted;
+        public bool AppCanBeRestarted 
+        {
+            get => this.appCanBeRestarted; 
+            private set
+            {
+                if (this.appCanBeRestarted != value)
+                {
+                    this.appCanBeRestarted = value;
+                    OnPropertyChanged(nameof(this.AppCanBeRestarted));
+                }
+            }
+        }
 
         public ICommand RestartApp {  get; set; }
 
@@ -158,6 +171,10 @@ namespace BukiOffline.ViewModels
         {
             this.appLauncher.process?.Kill();
 
+            this.AppCanBeRestarted = false;
+
+            CommandManager.InvalidateRequerySuggested();
+
             RestartLabels();
 
             await this.Launch();
@@ -174,16 +191,48 @@ namespace BukiOffline.ViewModels
             this.ExtractProjectVisibility = false;
         }
 
+        private void SubscribeToOnDownloadedContentChanged() 
+        {
+            this.downloadCoreProjectService.OnDownloadedContentChanged += DownloadCoreProjectService_OnDownloadedContentChanged;
+        }
+
+        private void SubscribeToAppLauncherOnProcessStartEvent() 
+        {
+            this.appLauncher.OnProcessStartEvent += AppLauncher_OnProcessStartEvent;
+        }
+
+        private void SubscribeToAppLauncherOnUACCancelledEvent()
+        {
+            this.appLauncher.OnUACCancelledEvent += AppLauncher_OnUACCancelledEvent;
+        }
+
+        private void AppLauncher_OnUACCancelledEvent(object? sender, EventArgs e)
+        {
+            MessageBox.Show("Потребен е администраторски пристап", "Инфо", MessageBoxButton.OK);
+
+            this.AppCanBeRestarted = true;
+            
+            CommandManager.InvalidateRequerySuggested();
+        }
+
         private void Init() 
         {
-            this.downloadCoreProjectService.OnDownloadedContentChanged -= DownloadCoreProjectService_OnDownloadedContentChanged;
+            this.SubscribeToOnDownloadedContentChanged();
 
-            this.downloadCoreProjectService.OnDownloadedContentChanged += DownloadCoreProjectService_OnDownloadedContentChanged;
+            this.SubscribeToAppLauncherOnProcessStartEvent();
+
+            this.SubscribeToAppLauncherOnUACCancelledEvent();
 
             this.RestartApp = new RestartAppCommand(this);
 
             CheckingDependenciesVisibility = false;
+        }
 
+        private void AppLauncher_OnProcessStartEvent(object? sender, EventArgs e)
+        {
+            this.AppCanBeRestarted = true;
+
+            CommandManager.InvalidateRequerySuggested();
         }
 
         private void DownloadCoreProjectService_OnDownloadedContentChanged(object? sender, EventArguments.DownloadedContentEventArgs e)
@@ -193,7 +242,6 @@ namespace BukiOffline.ViewModels
 
         private async Task ShowOpenDialog() 
         {
-
             FileDialog openFileDialog = new OpenFileDialog();
 
             openFileDialog.Filter = "WAV files (*.wav)|*.wav";
@@ -231,7 +279,9 @@ namespace BukiOffline.ViewModels
             if (launchResult)
             {
                 // launch the app
+
                 await appLauncher.LaunchApp();
+
                 return;
             }
 

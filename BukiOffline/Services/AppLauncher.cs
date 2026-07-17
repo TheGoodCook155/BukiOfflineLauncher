@@ -1,29 +1,43 @@
 ﻿using BukiOffline.Const;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
+using System.Windows;
 
 namespace BukiOffline.Services
 {
     public class AppLauncher
     {
         public Process process { get; private set; }
+
+        public event EventHandler OnProcessStartEvent;
+
+        public event EventHandler OnUACCancelledEvent;
         public async Task LaunchApp() 
         {
 
-           process = Process.Start(new ProcessStartInfo()
+            try
             {
-                FileName = "cmd.exe",
-                WorkingDirectory = ProjectPath.ExtractedDirectory,
-                UseShellExecute = true,
-                Verb = "runas",
-               Arguments = $@"/k title BukiASR && cd /d ""{ProjectPath.ExtractedDirectory}"" && venv\Scripts\activate && python run.py"
-           });
+                process = Process.Start(new ProcessStartInfo
+                {
+                    FileName = "cmd.exe",
+                    WorkingDirectory = ProjectPath.ExtractedDirectory,
+                    UseShellExecute = true,
+                    Verb = "runas",
+                    Arguments = $@"/k title BukiASR && cd /d ""{ProjectPath.ExtractedDirectory}"" && venv\Scripts\activate && python run.py"
+                });
+            }
+            catch (Win32Exception ex) when (ex.NativeErrorCode == 1223)
+            {
+                this.OnUACCancelledEvent?.Invoke(this, EventArgs.Empty);
+            }
 
             if (process == null)
             {
                 return;
             }
 
+            this.OnProcessStartEvent?.Invoke(this,EventArgs.Empty);
 
             Task<string> outputTask = process.StandardOutput.ReadToEndAsync();
 
