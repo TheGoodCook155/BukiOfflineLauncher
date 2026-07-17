@@ -45,6 +45,12 @@ namespace BukiOffline
             mainViewModel.Launch();
 
         }
+
+        protected override void OnExit(ExitEventArgs e)
+        {
+            this.appLauncher.process.Kill();
+            base.OnExit(e);
+        }
     }
 
 }

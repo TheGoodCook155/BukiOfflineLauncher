@@ -1,6 +1,11 @@
 ﻿
+using BukiOffline.Commands;
 using BukiOffline.Const;
 using BukiOffline.Services;
+using Microsoft.Win32;
+using System.Diagnostics;
+using System.Windows;
+using System.Windows.Input;
 
 namespace BukiOffline.ViewModels
 {
@@ -14,6 +19,31 @@ namespace BukiOffline.ViewModels
 
         private AppLauncher appLauncher;
 
+        public ICommand RestartApp {  get; set; }
+
+        private string? file;
+
+        private readonly TaskCompletionSource<string> deviceSelectionCompletionSource = new(TaskCreationOptions.RunContinuationsAsynchronously);
+
+        private string cpuGpuComboBoxSelectedValue;
+        public string CpuGpuComboBoxSelectedValue
+        {
+            get => this.cpuGpuComboBoxSelectedValue;
+            set
+            {
+                if (this.cpuGpuComboBoxSelectedValue != value)
+                {
+                    this.cpuGpuComboBoxSelectedValue = value;
+                    OnPropertyChanged(nameof(this.CpuGpuComboBoxSelectedValue));
+
+                    if (!string.IsNullOrEmpty(value))
+                    {
+                        deviceSelectionCompletionSource.TrySetResult(value);
+                    }
+                }
+            }
+        }
+
         private bool extractProjectVisibility;
         public bool ExtractProjectVisibility 
         {
@@ -24,6 +54,20 @@ namespace BukiOffline.ViewModels
                 {
                     this.extractProjectVisibility = value;
                     OnPropertyChanged(nameof(this.ExtractProjectVisibility));
+                }
+            }
+        }
+
+        private bool downloadingProjectVisibility;
+        public bool DownloadingProjectVisibility
+        {
+            get => this.downloadingProjectVisibility;
+            set
+            {
+                if (this.downloadingProjectVisibility != value)
+                {
+                    this.downloadingProjectVisibility = value;
+                    OnPropertyChanged(nameof(this.DownloadingProjectVisibility));
                 }
             }
         }
@@ -110,11 +154,36 @@ namespace BukiOffline.ViewModels
             this.Init();
         }
 
+        public async Task RestartApplicationCommand() 
+        {
+            this.appLauncher.process?.Kill();
+
+            RestartLabels();
+
+            await this.Launch();
+        }
+
+        private void RestartLabels() 
+        {
+            this.DownloadPercent = "0.00";
+            this.CheckingDependenciesMessage = "Checking Dependencies";
+            this.CheckingDependenciesVisibility = false;
+            this.DownloadMessage = "Downloading project";
+            this.DownloadingProjectVisibility = false;
+            this.UnzipMessage = "Extracting project";
+            this.ExtractProjectVisibility = false;
+        }
+
         private void Init() 
         {
             this.downloadCoreProjectService.OnDownloadedContentChanged -= DownloadCoreProjectService_OnDownloadedContentChanged;
 
             this.downloadCoreProjectService.OnDownloadedContentChanged += DownloadCoreProjectService_OnDownloadedContentChanged;
+
+            this.RestartApp = new RestartAppCommand(this);
+
+            CheckingDependenciesVisibility = false;
+
         }
 
         private void DownloadCoreProjectService_OnDownloadedContentChanged(object? sender, EventArguments.DownloadedContentEventArgs e)
@@ -122,9 +191,36 @@ namespace BukiOffline.ViewModels
             this.DownloadPercent = e.DownloadedSize + "%";
         }
 
+        private async Task ShowOpenDialog() 
+        {
+
+            FileDialog openFileDialog = new OpenFileDialog();
+
+            openFileDialog.Filter = "WAV files (*.wav)|*.wav";
+
+            openFileDialog.Title = "Одбери WAV фајл";
+
+            bool? res = openFileDialog.ShowDialog();
+
+            if (res == true)
+            {
+                file = openFileDialog.FileName;
+            }
+            else
+            {
+                MessageBox.Show("Одбери аудио фајл", "Инфо", MessageBoxButton.OK);
+                await Task.Delay(5000);
+                await ShowOpenDialog();
+            }
+        }
+
         public async Task Launch()
         {
-            this.appLauncher.SetRunPyFile();//fix this using open file for file and CPU and GPU
+            string device = await deviceSelectionCompletionSource.Task;
+
+            await ShowOpenDialog();
+
+            this.appLauncher.SetRunPyFile(this.file!,device);
 
             await DownloadCoreProject();
 
@@ -144,6 +240,8 @@ namespace BukiOffline.ViewModels
 
         private async Task<bool> PrerequisitesChecker() 
         {
+            this.CheckingDependenciesVisibility = true;
+
             CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
 
             CancellationToken token = cancellationTokenSource.Token;
@@ -161,6 +259,8 @@ namespace BukiOffline.ViewModels
 
         private async Task DownloadCoreProject() 
         {
+            this.DownloadingProjectVisibility = true;
+
             CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
 
             CancellationToken token = cancellationTokenSource.Token;

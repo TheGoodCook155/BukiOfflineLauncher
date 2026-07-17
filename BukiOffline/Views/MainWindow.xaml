@@ -6,24 +6,32 @@
         xmlns:local="clr-namespace:BukiOffline"
         xmlns:converters="clr-namespace:BukiOffline.Converters"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="Буки Offline" MaxWidth="500" MaxHeight="380" Height="380" Width="500">
 
     <Window.Resources>
         <converters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
     </Window.Resources>
 
-    <Grid>
-
+    <Grid Margin="40">
         <StackPanel >
+            <StackPanel Orientation="Horizontal" >
+                <Label Content="Одбери CPU или GPU"/>
+                <ComboBox Width="200" 
+                            SelectedValue="{Binding CpuGpuComboBoxSelectedValue}"
+                            SelectedValuePath="Content">
+                    <ComboBoxItem>CPU</ComboBoxItem>
+                    <ComboBoxItem>GPU</ComboBoxItem>
+                </ComboBox>
+            </StackPanel>
+            
             <StackPanel Orientation="Horizontal">
-                <Label Content="{Binding DownloadMessage}" MinWidth="120" Width="180"/>
-                <Label Content="{Binding DownloadPercent}" MinWidth="100"/>
+                <Label Content="{Binding DownloadMessage}" Visibility="{Binding DownloadingProjectVisibility, Converter={StaticResource BoolToVisibilityConverter}}" MinWidth="120" Width="180"/>
+                <Label Content="{Binding DownloadPercent}" Visibility="{Binding DownloadingProjectVisibility, Converter={StaticResource BoolToVisibilityConverter}}" MinWidth="100"/>
             </StackPanel>
 
             <Label Content="{Binding UnzipMessage}" Visibility="{Binding ExtractProjectVisibility, Converter={StaticResource BoolToVisibilityConverter}}"/>
-            <Label Content="{Binding CheckingDependenciesMessage}" Visibility="{Binding CheckingDependepnciesVisibility, Converter={StaticResource BoolToVisibilityConverter}}" />
+            <Label Content="{Binding CheckingDependenciesMessage}" Visibility="{Binding CheckingDependenciesVisibility, Converter={StaticResource BoolToVisibilityConverter}}" />
+            <Button Width="150" Margin="20" Content="Restart" Command="{Binding RestartApp}"/>
         </StackPanel>
-
     </Grid>
-
 </Window>

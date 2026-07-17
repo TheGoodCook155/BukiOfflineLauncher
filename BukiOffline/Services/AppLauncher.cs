@@ -6,36 +6,18 @@ namespace BukiOffline.Services
 {
     public class AppLauncher
     {
+        public Process process { get; private set; }
         public async Task LaunchApp() 
         {
-            //foreach(var processStartInfo in startAppProcessStartInfoList) 
-            //{
-            //    using var process = Process.Start(processStartInfo);
 
-            //    if (process == null)
-            //    {
-            //        return;
-            //    }
-
-            //    Task<string> outputTask = process.StandardOutput.ReadToEndAsync();
-
-            //    Task<string> errorTask = process.StandardError.ReadToEndAsync();
-
-            //    await process.WaitForExitAsync();
-
-            //    string output = await outputTask;
-            //    string error = await errorTask;
-            //    //log the output and error
-            //}
-
-            using var process = Process.Start(new ProcessStartInfo()
+           process = Process.Start(new ProcessStartInfo()
             {
                 FileName = "cmd.exe",
                 WorkingDirectory = ProjectPath.ExtractedDirectory,
                 UseShellExecute = true,
                 Verb = "runas",
-                Arguments = $@"/k cd /d ""{ProjectPath.ExtractedDirectory}"" && venv\Scripts\activate && python run.py"
-            });
+               Arguments = $@"/k title BukiASR && cd /d ""{ProjectPath.ExtractedDirectory}"" && venv\Scripts\activate && python run.py"
+           });
 
             if (process == null)
             {
@@ -54,33 +36,48 @@ namespace BukiOffline.Services
             //log the output and error
         }
 
-        public void SetRunPyFile() 
+        public void SetRunPyFile(string filePath, string device) 
         {
-            // this should be called first
-
-            //change one line
-
-            //source=".",# on fist execution this line should be: source="Macedonian-ASR/buki-wav2vec2-2.0" after that change it to the local folder . where the project resides
-
             var file = Path.Combine(ProjectPath.ExtractedDirectory, ProjectPath.RunPy);
 
             string [] lines = File.ReadAllLines(file);
 
-            for (int i = 0; i < lines.Length; i++)
+            var removedComments = lines.Where(el => !el.StartsWith("#")).ToArray();
+
+            for (int i = 0; i < removedComments.Length; i++)
             {
-                string line = lines[i];
+                string line = removedComments[i];
+
+                if (line.StartsWith("#")) 
+                {
+                    removedComments[i] = string.Empty;
+                }
 
                 if (line.Contains("source")) 
                 {
-                    lines[i] = "source=\".\",";
+                    removedComments[i] = "source=\".\",";
+                }
+
+
+                if (line.Contains("audio_file_path ="))
+                {
+                    string path = Path.GetFullPath(filePath)
+                        .Replace("\\", "\\\\");
+
+                    removedComments[i] = $"    audio_file_path = \"{path}\"";
+                }
+
+                if (device == "GPU" && line.Contains("device ="))
+                {
+                    removedComments[i] = "device = torch.device(\"cuda\" if torch.cuda.is_available() else \"cpu\")";
+                }
+                else if (device == "CPU" && line.Contains("device ="))
+                {
+                    removedComments[i] = "device = torch.device(\"cpu\")";
                 }
             }
 
-            File.WriteAllLines(file, lines);
-
-            // choose file?
-
-            // choose GPU vs CPU (this should be first maybe)
+            File.WriteAllLines(file, removedComments);
         }
     }
 }
