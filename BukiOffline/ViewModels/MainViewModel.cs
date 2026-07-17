@@ -268,9 +268,9 @@ namespace BukiOffline.ViewModels
 
             await ShowOpenDialog();
 
-            this.appLauncher.SetRunPyFile(this.file!,device);
-
             await DownloadCoreProject();
+
+            this.appLauncher.SetRunPyFile(this.file!,device);
 
             await UnzipProject();
 
