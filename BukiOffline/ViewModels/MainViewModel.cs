@@ -3,6 +3,7 @@ using BukiOffline.Commands;
 using BukiOffline.Const;
 using BukiOffline.Services;
 using Microsoft.Win32;
+using Serilog;
 using System.Windows;
 using System.Windows.Input;
 
@@ -17,6 +18,8 @@ namespace BukiOffline.ViewModels
         private DownloadCoreProjectService downloadCoreProjectService;
 
         private AppLauncher appLauncher;
+
+        private ILogger logger;
 
         private bool appCanBeRestarted;
         public bool AppCanBeRestarted 
@@ -158,17 +161,21 @@ namespace BukiOffline.ViewModels
         public MainViewModel(PrerequisitesChecker prerequisitesChecker,
             UnzipCoreProject unzipCoreProject,
             DownloadCoreProjectService downloadCoreProjectService,
-            AppLauncher appLauncher)
+            AppLauncher appLauncher,
+            ILogger logger)
         {
             this.prerequisitesChecker = prerequisitesChecker;
             this.unzipCoreProject = unzipCoreProject;
             this.downloadCoreProjectService = downloadCoreProjectService;
             this.appLauncher = appLauncher;
+            this.logger = logger.ForContext<MainViewModel>();
             this.Init();
         }
 
         public async Task RestartApplicationCommand() 
         {
+            logger.Information("Restarting app");
+
             this.appLauncher.process?.Kill();
 
             this.AppCanBeRestarted = false;

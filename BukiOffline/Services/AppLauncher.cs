@@ -1,13 +1,21 @@
 ﻿using BukiOffline.Const;
+using Serilog;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
-using System.Windows;
 
 namespace BukiOffline.Services
 {
     public class AppLauncher
     {
+
+        private ILogger logger;
+
+        public AppLauncher(ILogger logger)
+        {
+            this.logger = logger.ForContext<AppLauncher>();
+        }
+
         public Process process { get; private set; }
 
         public event EventHandler OnProcessStartEvent;
@@ -18,6 +26,8 @@ namespace BukiOffline.Services
 
             try
             {
+                logger.Information("Core process started");
+
                 process = Process.Start(new ProcessStartInfo
                 {
                     FileName = "cmd.exe",
@@ -30,6 +40,8 @@ namespace BukiOffline.Services
             catch (Win32Exception ex) when (ex.NativeErrorCode == 1223)
             {
                 this.OnUACCancelledEvent?.Invoke(this, EventArgs.Empty);
+
+                logger.Information("Administrator rights not granted");
             }
 
             if (process == null)
@@ -47,11 +59,18 @@ namespace BukiOffline.Services
 
             string output = await outputTask;
             string error = await errorTask;
-            //log the output and error
+            
+            logger.Error(error);
         }
 
         public void SetRunPyFile(string filePath, string device) 
         {
+            logger.Information("Setting run.py");
+
+            logger.Information($"Audio file path: {filePath}");
+
+            logger.Information($"Device: {device}");
+
             var file = Path.Combine(ProjectPath.ExtractedDirectory, ProjectPath.RunPy);
 
             string [] lines = File.ReadAllLines(file);
@@ -92,6 +111,8 @@ namespace BukiOffline.Services
             }
 
             File.WriteAllLines(file, removedComments);
+
+            logger.Information("Writing to run.py");
         }
     }
 }

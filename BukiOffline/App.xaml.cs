@@ -1,5 +1,6 @@
 ﻿using BukiOffline.Services;
 using BukiOffline.ViewModels;
+using Serilog;
 using System.Configuration;
 using System.Data;
 using System.Windows;
@@ -15,25 +16,34 @@ namespace BukiOffline
         private UnzipCoreProject unzipCoreProject;
         private DownloadCoreProjectService downloadCoreProjectService;
         private AppLauncher appLauncher;
-        private void Init() 
+        private void Init(ILogger logger) 
         {
-            this.pythonInstaller = new PythonInstaller();
-            this.unzipCoreProject = new UnzipCoreProject();
-            this.downloadCoreProjectService = new DownloadCoreProjectService();
-            this.appLauncher = new AppLauncher();   
+            this.pythonInstaller = new PythonInstaller(logger);
+            this.unzipCoreProject = new UnzipCoreProject(logger);
+            this.downloadCoreProjectService = new DownloadCoreProjectService(logger);
+            this.appLauncher = new AppLauncher(logger);   
         }
         protected override void OnStartup(StartupEventArgs e)
         {
             base.OnStartup(e);
 
-            this.Init();
+            ILogger logger = new LoggerConfiguration()
+                        .MinimumLevel.Information()
+    .                    WriteTo.File(
+                            path: "Logs\\log-.txt",
+                            rollingInterval: RollingInterval.Day,
+                            outputTemplate:"{Timestamp:yyyy-MM-dd HH:mm:ss.fff} [{Level:u3}] [{SourceContext}] {Message:lj}{NewLine}{Exception}")
+    .                    CreateLogger();
 
-            var prerequisitesChecker = new PrerequisitesChecker(this.pythonInstaller);
+            this.Init(logger);
+
+            var prerequisitesChecker = new PrerequisitesChecker(this.pythonInstaller,logger);
 
             var mainViewModel = new MainViewModel(prerequisitesChecker,
                 this.unzipCoreProject,
                 this.downloadCoreProjectService,
-                this.appLauncher);
+                this.appLauncher,
+                logger);
 
             var mainWindow = new MainWindow
             {

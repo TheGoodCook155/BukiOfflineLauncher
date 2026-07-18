@@ -1,9 +1,9 @@
 ﻿using BukiOffline.Const;
-using BukiOffline.Services;
+using Serilog;
 using System.Diagnostics;
 using System.IO;
 
-namespace BukiOffline
+namespace BukiOffline.Services
 {
     public class PrerequisitesChecker
     {
@@ -35,14 +35,19 @@ namespace BukiOffline
 
         private Iinstaller pythonInstaller;
 
-        public PrerequisitesChecker(Iinstaller pythonInstaller)
+        private ILogger logger;
+
+        public PrerequisitesChecker(Iinstaller pythonInstaller, ILogger logger)
         {
             this.pythonInstaller = pythonInstaller;
+            this.logger = logger.ForContext<PrerequisitesChecker>();
         }
         public async Task<bool> Check(Dictionary<Dependency,ProcessStartInfo> processStartInfoInfoList) 
         {
             foreach (var kvp in processStartInfoInfoList)
             {
+                logger.Information($"Checking {kvp.Key}");
+
                 var processStartInfo = kvp.Value;
 
                 bool dependencyPresent = CheckDependency(kvp.Key);
@@ -67,7 +72,12 @@ namespace BukiOffline
                 await process.WaitForExitAsync();
 
                 string output = await outputTask;
+
+                logger.Information($"{output}");
+
                 string error = await errorTask;
+
+                logger.Error(error);
 
                 if (kvp.Key == Dependency.VenvCreate) 
                 {

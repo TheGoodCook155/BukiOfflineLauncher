@@ -1,6 +1,7 @@
 ﻿
 using BukiOffline.Const;
 using BukiOffline.EventArguments;
+using Serilog;
 using System.IO;
 using System.Net.Http;
 
@@ -8,11 +9,20 @@ namespace BukiOffline.Services
 {
     public class DownloadCoreProjectService
     {
+        private ILogger logger;
+
+        public DownloadCoreProjectService(ILogger logger)
+        {
+            this.logger = logger.ForContext<DownloadCoreProjectService>();
+        }
+
         public event EventHandler<DownloadedContentEventArgs> OnDownloadedContentChanged;
         
         public async Task DownloadCoreProject()
         {
             //https://archive.org/download/buki-updated/buki-updated.zip
+
+            logger.Information("Project download started");
 
             const string downloadUrl = "https://archive.org/download/buki-updated/buki-updated.zip";
 
@@ -31,6 +41,8 @@ namespace BukiOffline.Services
 
             if (Directory.Exists(ProjectPath.ExtractedDirectory) || File.Exists(ProjectPath.ZipPath) && GetLocalFileLength(ProjectPath.ZipPath) == totalBytes)
             {
+                logger.Information("Project already ready");
+
                 return;
             }
 
@@ -66,6 +78,8 @@ namespace BukiOffline.Services
                     OnDownloadedContentChanged?.Invoke(this, new DownloadedContentEventArgs() { DownloadedSize = formattedPercentage});
                 }
             }
+
+            logger.Information("Project download done");
         }
 
         private static long GetLocalFileLength(string zipPath)
