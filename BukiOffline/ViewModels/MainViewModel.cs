@@ -270,9 +270,9 @@ namespace BukiOffline.ViewModels
 
             await DownloadCoreProject();
 
-            this.appLauncher.SetRunPyFile(this.file!,device);
-
             await UnzipProject();
+
+            this.appLauncher.SetRunPyFile(this.file!,device);
 
             bool launchResult = await PrerequisitesChecker();
 
