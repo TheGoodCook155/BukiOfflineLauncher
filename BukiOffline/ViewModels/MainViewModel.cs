@@ -102,7 +102,7 @@ namespace BukiOffline.ViewModels
             }
         }
 
-        private string unzipMessage = "Extracting project";
+        private string unzipMessage = "Проектот се отпакува";
         public string UnzipMessage
         {
             get => this.unzipMessage;
@@ -116,7 +116,7 @@ namespace BukiOffline.ViewModels
             }
         }
 
-        private string downloadMessage = "Downloading project";
+        private string downloadMessage = "Проектот се симнува";
         public string DownloadMessage
         {
             get => this.downloadMessage;
@@ -130,7 +130,7 @@ namespace BukiOffline.ViewModels
             }
         }
 
-        private string checkingDependenciesMessage = "Checking Dependencies";
+        private string checkingDependenciesMessage = "Проверка на библиотеки";
         public string CheckingDependenciesMessage
         {
             get => this.checkingDependenciesMessage;
@@ -190,11 +190,11 @@ namespace BukiOffline.ViewModels
         private void RestartLabels() 
         {
             this.DownloadPercent = "0.00";
-            this.CheckingDependenciesMessage = "Checking Dependencies";
+            this.CheckingDependenciesMessage = "Проверка на библиотеки";
             this.CheckingDependenciesVisibility = false;
-            this.DownloadMessage = "Downloading project";
+            this.DownloadMessage = "Проектот се симнува";
             this.DownloadingProjectVisibility = false;
-            this.UnzipMessage = "Extracting project";
+            this.UnzipMessage = "Проектот се отпакува";
             this.ExtractProjectVisibility = false;
         }
 
@@ -309,7 +309,7 @@ namespace BukiOffline.ViewModels
 
             cancellationTokenSource.Cancel();
 
-            CheckingDependenciesMessage = CheckingDependenciesMessage.Trim('.') + "... - Done!";
+            CheckingDependenciesMessage = CheckingDependenciesMessage.Trim('.') + "... - Готово!";
 
             return launchResult;
         }
@@ -337,7 +337,7 @@ namespace BukiOffline.ViewModels
 
             }
 
-            DownloadMessage = DownloadMessage.Trim('.') + "... - Done!";
+            DownloadMessage = DownloadMessage.Trim('.') + "... - Готово!";
             this.DownloadPercent = "100%";
         }
 
@@ -370,7 +370,7 @@ namespace BukiOffline.ViewModels
 
             }
 
-            UnzipMessage = UnzipMessage.Trim('.') + "... - Done!";
+            UnzipMessage = UnzipMessage.Trim('.') + "... - Готово!";
         }
 
         private async Task MessageProgress(Func<string> getValue, Action<string> setValue, CancellationToken token)

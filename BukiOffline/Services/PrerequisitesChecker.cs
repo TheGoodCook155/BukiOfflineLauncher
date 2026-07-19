@@ -46,22 +46,25 @@ namespace BukiOffline.Services
         {
             foreach (var kvp in processStartInfoInfoList)
             {
-                logger.Information($"Checking {kvp.Key}");
-
                 var processStartInfo = kvp.Value;
 
                 bool dependencyPresent = CheckDependency(kvp.Key);
+
+                logger.Information($"Dependency is present: {dependencyPresent}");
 
                 if (dependencyPresent) 
                 {
                     continue;
                 }
 
+                logger.Information("Starting process");
+
                 using var process = Process.Start(processStartInfo);
 
                 if (process == null)
                 {
                     ErrorState += " Failed to start process.";
+                    logger.Information("Process is null");
                     return false;
                 }
 
@@ -156,6 +159,13 @@ namespace BukiOffline.Services
 
         private bool CheckDependency(Dependency key)
         {
+            logger.Information($"Checking dependency: {key}");
+
+            if (!Directory.Exists(ProjectPath.SriptsDirectory)) 
+            {
+                return false;
+            }
+
             var fileNames = Directory
                                 .GetFiles(ProjectPath.SriptsDirectory)
                                 .Select(Path.GetFileName)
@@ -195,6 +205,7 @@ namespace BukiOffline.Services
                 case Dependency.HuggingFaceHub:
                     return fileNames.Contains("huggingface-cli.exe");
             }
+
             return false;
         }
 
