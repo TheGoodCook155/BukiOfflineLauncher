@@ -286,7 +286,6 @@ namespace BukiOffline.ViewModels
             if (launchResult)
             {
                 // launch the app
-
                 await appLauncher.LaunchApp();
 
                 return;
@@ -343,6 +342,8 @@ namespace BukiOffline.ViewModels
 
         private async Task UnzipProject()
         {
+            logger.Information("Unziping started");
+
             ExtractProjectVisibility = true;
 
             CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
@@ -358,6 +359,8 @@ namespace BukiOffline.ViewModels
             var messageProgressTask = MessageProgress(() => UnzipMessage, value => UnzipMessage = value, token);
 
             await unzipAndDeleteTask;
+
+            logger.Information("Unziping done, remove core zip done");
 
             cancellationTokenSource.Cancel();
 

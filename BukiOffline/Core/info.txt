@@ -1,1 +1,1 @@
-﻿
+﻿Линк до core проектот - https://huggingface.co/Macedonian-ASR
