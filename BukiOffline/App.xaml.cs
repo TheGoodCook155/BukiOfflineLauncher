@@ -37,12 +37,14 @@ namespace BukiOffline
 
             this.Init(logger);
 
-            var prerequisitesChecker = new PrerequisitesChecker(this.pythonInstaller,logger);
+            var prerequisitesChecker = new PrerequisitesChecker(logger);
 
-            var mainViewModel = new MainViewModel(prerequisitesChecker,
+            var mainViewModel = new MainViewModel(
+                prerequisitesChecker,
                 this.unzipCoreProject,
                 this.downloadCoreProjectService,
                 this.appLauncher,
+                this.pythonInstaller,
                 logger);
 
             var mainWindow = new MainWindow

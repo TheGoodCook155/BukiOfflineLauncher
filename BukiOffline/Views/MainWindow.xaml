@@ -25,12 +25,14 @@
             </StackPanel>
             
             <StackPanel Orientation="Horizontal">
-                <Label Content="{Binding DownloadMessage}" Visibility="{Binding DownloadingProjectVisibility, Converter={StaticResource BoolToVisibilityConverter}}" MinWidth="120" Width="180"/>
+                <Label Content="{Binding DownloadMessage}" Visibility="{Binding DownloadingProjectVisibility, Converter={StaticResource BoolToVisibilityConverter}}" MinWidth="140" Width="190"/>
                 <Label Content="{Binding DownloadPercent}" Visibility="{Binding DownloadingProjectVisibility, Converter={StaticResource BoolToVisibilityConverter}}" MinWidth="100"/>
             </StackPanel>
 
             <Label Content="{Binding UnzipMessage}" Visibility="{Binding ExtractProjectVisibility, Converter={StaticResource BoolToVisibilityConverter}}"/>
+            <Label Content="{Binding DownloadPythonMessage}" Visibility="{Binding DownloadPythonVisibility, Converter={StaticResource BoolToVisibilityConverter}}"/>
             <Label Content="{Binding CheckingDependenciesMessage}" Visibility="{Binding CheckingDependenciesVisibility, Converter={StaticResource BoolToVisibilityConverter}}" />
+
             <Button Width="150" Margin="20" Content="Restart" Command="{Binding RestartApp}"/>
         </StackPanel>
     </Grid>

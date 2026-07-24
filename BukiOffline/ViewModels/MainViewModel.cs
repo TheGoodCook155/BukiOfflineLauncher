@@ -19,6 +19,8 @@ namespace BukiOffline.ViewModels
 
         private AppLauncher appLauncher;
 
+        private Iinstaller pythonInstaller;
+
         private ILogger logger;
 
         private bool appCanBeRestarted;
@@ -102,6 +104,34 @@ namespace BukiOffline.ViewModels
             }
         }
 
+        private bool downloadPythonVisibility;
+        public bool DownloadPythonVisibility
+        {
+            get => this.downloadPythonVisibility;
+            set
+            {
+                if (this.downloadPythonVisibility != value)
+                {
+                    this.downloadPythonVisibility = value;
+                    OnPropertyChanged(nameof(this.DownloadPythonVisibility));
+                }
+            }
+        }
+
+        private string downloadPythonMessage = "Python се симнува";
+        public string DownloadPythonMessage
+        {
+            get => this.downloadPythonMessage;
+            set
+            {
+                if (this.downloadPythonMessage != value)
+                {
+                    this.downloadPythonMessage = value;
+                    OnPropertyChanged(nameof(this.DownloadPythonMessage));
+                }
+            }
+        }
+
         private string unzipMessage = "Проектот се отпакува";
         public string UnzipMessage
         {
@@ -158,10 +188,12 @@ namespace BukiOffline.ViewModels
             }
         }
 
-        public MainViewModel(PrerequisitesChecker prerequisitesChecker,
+        public MainViewModel(
+            PrerequisitesChecker prerequisitesChecker,
             UnzipCoreProject unzipCoreProject,
             DownloadCoreProjectService downloadCoreProjectService,
             AppLauncher appLauncher,
+            Iinstaller pythonInstaller,
             ILogger logger)
         {
             this.prerequisitesChecker = prerequisitesChecker;
@@ -169,6 +201,7 @@ namespace BukiOffline.ViewModels
             this.downloadCoreProjectService = downloadCoreProjectService;
             this.appLauncher = appLauncher;
             this.logger = logger.ForContext<MainViewModel>();
+            this.pythonInstaller = pythonInstaller;
             this.Init();
         }
 
@@ -196,6 +229,8 @@ namespace BukiOffline.ViewModels
             this.DownloadingProjectVisibility = false;
             this.UnzipMessage = "Проектот се отпакува";
             this.ExtractProjectVisibility = false;
+            this.DownloadPythonMessage = "Python се симнува";
+            this.DownloadPythonVisibility = false;
         }
 
         private void SubscribeToOnDownloadedContentChanged() 
@@ -281,6 +316,8 @@ namespace BukiOffline.ViewModels
 
             this.appLauncher.SetRunPyFile(this.file!,device);
 
+            await InstallPython();
+
             bool launchResult = await PrerequisitesChecker();
 
             if (launchResult)
@@ -292,6 +329,23 @@ namespace BukiOffline.ViewModels
             }
 
             // log the error codes and manually resolve...
+        }
+
+        private async Task InstallPython() 
+        {
+            this.DownloadPythonVisibility = true;
+
+            CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
+
+            CancellationToken token = cancellationTokenSource.Token;
+
+            var messageProgressTask = MessageProgress(() => this.DownloadPythonMessage, value => this.DownloadPythonMessage = value, token);
+
+            await this.pythonInstaller.Install();
+
+            cancellationTokenSource.Cancel();
+
+            this.DownloadPythonMessage = this.DownloadPythonMessage.Trim('.') + "... - Готово!";
         }
 
         private async Task<bool> PrerequisitesChecker() 

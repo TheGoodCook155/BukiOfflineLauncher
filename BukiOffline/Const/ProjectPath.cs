@@ -6,6 +6,7 @@ namespace BukiOffline.Const
     {
        public static string CurrentDirectory = AppContext.BaseDirectory;
        public static string ZipPath = Path.Combine(CurrentDirectory, @"Core\buki-updated.zip");
+       public static string PythonInstallationPath = Path.Combine(CurrentDirectory, @"Core\python.exe");
        public static string ExtractPath = Path.Combine(CurrentDirectory, @"Core");
        public static string FileName = "buki-updated.zip";
        public static string ExtractedDirectory = Path.Combine(CurrentDirectory, ExtractPath, "buki-updated");

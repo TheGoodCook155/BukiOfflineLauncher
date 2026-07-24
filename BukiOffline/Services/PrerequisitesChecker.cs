@@ -33,22 +33,20 @@ namespace BukiOffline.Services
 
         public string ErrorState { get; set; } = string.Empty;
 
-        private Iinstaller pythonInstaller;
-
         private ILogger logger;
 
-        public PrerequisitesChecker(Iinstaller pythonInstaller, ILogger logger)
+        public PrerequisitesChecker(ILogger logger)
         {
-            this.pythonInstaller = pythonInstaller;
             this.logger = logger.ForContext<PrerequisitesChecker>();
         }
+
         public async Task<bool> Check(Dictionary<Dependency,ProcessStartInfo> processStartInfoInfoList) 
         {
             foreach (var kvp in processStartInfoInfoList)
             {
                 var processStartInfo = kvp.Value;
 
-                bool dependencyPresent = CheckDependency(kvp.Key);
+                bool dependencyPresent = await CheckDependency(kvp.Key);
 
                 logger.Information($"Dependency is present: {dependencyPresent}");
 
@@ -91,16 +89,6 @@ namespace BukiOffline.Services
 
                 switch (kvp.Key)
                 {
-                    case Dependency.Python:
-                        result = CheckVersion(output, DependencyVersions.Python);
-
-                        if (!result && string.IsNullOrEmpty(output))
-                        {
-                            bool installResult = pythonInstaller.Install(out var installError);
-
-                            ErrorState += " " + installError;
-                        }
-                        break;
                     case Dependency.VenvCreate:
                         result = CheckVersion(output, DependencyVersions.VenvCreate);
                         ErrorState += " " + error;
@@ -152,12 +140,10 @@ namespace BukiOffline.Services
                     return false;
                 }
             }
-
             return true;
-
         }
 
-        private bool CheckDependency(Dependency key)
+        private async Task<bool> CheckDependency(Dependency key)
         {
             logger.Information($"Checking dependency: {key}");
 
@@ -179,7 +165,6 @@ namespace BukiOffline.Services
                         return true;
                     }
                     break;
-
                 case Dependency.Pip:
                     return pipExeArray.All(fileNames.Contains);
 
@@ -194,12 +179,11 @@ namespace BukiOffline.Services
 
                 case Dependency.Tokenizers:
                     //no new dependencies installed
-                    break;
+                    return true;
                 case Dependency.Numpy:
                     return fileNames.Contains("f2py.exe");
                 case Dependency.Requests:
-                    //no new dependencies installed
-                    break;
+                    return true;
                 case Dependency.Librosa:
                     return librosaExeArray.All(fileNames.Contains);
                 case Dependency.HuggingFaceHub:
@@ -209,7 +193,7 @@ namespace BukiOffline.Services
             return false;
         }
 
-        private static bool CheckVersion(string result, string dependencyVersion) 
+        public static bool CheckVersion(string result, string dependencyVersion) 
         {
             if (!result.Contains(dependencyVersion)) 
             {

@@ -7,18 +7,6 @@ namespace BukiOffline.Const
     {
         public static Dictionary<Dependency, ProcessStartInfo> DependencyProcessStartInfoList = new Dictionary<Dependency, ProcessStartInfo>()
         {
-            {
-                Dependency.Python,
-                new ProcessStartInfo
-                {
-                    FileName = "py",
-                    Arguments = "-0",
-                    RedirectStandardOutput = true,
-                    RedirectStandardError = true,
-                    UseShellExecute = false,
-                    CreateNoWindow = true
-                }
-            },
               {
                 Dependency.VenvCreate,
                 new ProcessStartInfo
@@ -38,6 +26,18 @@ namespace BukiOffline.Const
                 {
                     FileName = Path.Combine(ProjectPath.ExtractedDirectory,"venv\\Scripts\\python.exe"),
                     Arguments = "-m pip install --upgrade pip",
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true,
+                    UseShellExecute = false,
+                    CreateNoWindow = true
+                }
+            },
+            {
+                Dependency.Numpy,
+                new ProcessStartInfo
+                {
+                    FileName = Path.Combine(ProjectPath.ExtractedDirectory,"venv\\Scripts\\python.exe"),
+                    Arguments = "-m pip install \"numpy<2\"",
                     RedirectStandardOutput = true,
                     RedirectStandardError = true,
                     UseShellExecute = false,
@@ -86,18 +86,6 @@ namespace BukiOffline.Const
                 {
                     FileName = Path.Combine(ProjectPath.ExtractedDirectory,"venv\\Scripts\\python.exe"),
                     Arguments = "-m pip install tokenizers==0.13.3",
-                    RedirectStandardOutput = true,
-                    RedirectStandardError = true,
-                    UseShellExecute = false,
-                    CreateNoWindow = true
-                }
-            },
-            {
-                Dependency.Numpy,
-                new ProcessStartInfo
-                {
-                    FileName = Path.Combine(ProjectPath.ExtractedDirectory,"venv\\Scripts\\python.exe"),
-                    Arguments = "-m pip install \"numpy<2\"",
                     RedirectStandardOutput = true,
                     RedirectStandardError = true,
                     UseShellExecute = false,
