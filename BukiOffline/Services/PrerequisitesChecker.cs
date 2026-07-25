@@ -188,6 +188,8 @@ namespace BukiOffline.Services
                     return librosaExeArray.All(fileNames.Contains);
                 case Dependency.HuggingFaceHub:
                     return fileNames.Contains("huggingface-cli.exe");
+                case Dependency.SentencePiece:
+                    return false;
             }
 
             return false;

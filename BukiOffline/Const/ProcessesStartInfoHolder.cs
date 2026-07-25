@@ -57,6 +57,18 @@ namespace BukiOffline.Const
                 }
             },
             {
+                 Dependency.SentencePiece,
+                 new ProcessStartInfo
+                 {
+                     FileName = Path.Combine(ProjectPath.ExtractedDirectory,"venv\\Scripts\\python.exe"),
+                     Arguments = "-m pip install sentencepiece==0.1.99",
+                     RedirectStandardOutput = true,
+                     RedirectStandardError = true,
+                     UseShellExecute = false,
+                     CreateNoWindow = true
+                 }
+            },
+            {
                 Dependency.Speechbrain,
                 new ProcessStartInfo
                 {

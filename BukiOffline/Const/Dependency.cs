@@ -14,6 +14,7 @@ namespace BukiOffline.Const
         Numpy,
         Requests,
         Librosa,
-        HuggingFaceHub
+        HuggingFaceHub, 
+        SentencePiece
     }
 }
