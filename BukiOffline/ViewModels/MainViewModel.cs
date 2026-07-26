@@ -322,13 +322,14 @@ namespace BukiOffline.ViewModels
 
             if (launchResult)
             {
-                // launch the app
                 await appLauncher.LaunchApp();
 
                 return;
             }
 
-            // log the error codes and manually resolve...
+            this.logger.Information("Listing errors");
+
+            this.logger.Error(this.prerequisitesChecker.ErrorState);
         }
 
         private async Task InstallPython() 

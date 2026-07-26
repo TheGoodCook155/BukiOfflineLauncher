@@ -91,46 +91,46 @@ namespace BukiOffline.Services
                 {
                     case Dependency.VenvCreate:
                         result = CheckVersion(output, DependencyVersions.VenvCreate);
-                        ErrorState += " " + error;
+                        ErrorState += "\n" + error;
                         break;
                     case Dependency.Torch:
                         result = CheckVersion(output, DependencyVersions.Torch);
-                        ErrorState += " " + error;
+                        ErrorState += "\n" + error;
                         break;
 
                     case Dependency.Speechbrain:
                         result = CheckVersion(output, DependencyVersions.Speechbrain);
-                        ErrorState += " " + error;
+                        ErrorState += "\n" + error;
                         break;
 
                     case Dependency.Transformers:
                         result = CheckVersion(output, DependencyVersions.Transformers);
-                        ErrorState += " " + error;
+                        ErrorState += "\n" + error;
                         break;
 
                     case Dependency.Tokenizers:
                         result = CheckVersion(output, DependencyVersions.Tokenizers);
-                        ErrorState += " " + error;
+                        ErrorState += "\n" + error;
                         break;
 
                     case Dependency.Numpy:
                         result = CheckVersion(output, DependencyVersions.Numpy);
-                        ErrorState += " " + error;
+                        ErrorState += "\n" + error;
                         break;
 
                     case Dependency.Requests:
                         result = CheckVersion(output, DependencyVersions.Requests);
-                        ErrorState += " " + error;
+                        ErrorState += "\n" + error;
                         break;
 
                     case Dependency.Librosa:
                         result = CheckVersion(output, DependencyVersions.Librosa);
-                        ErrorState += " " + error;
+                        ErrorState += "\n" + error;
                         break;
 
                     case Dependency.HuggingFaceHub:
                         result = CheckVersion(output, DependencyVersions.HuggingFace);
-                        ErrorState += " " + error;
+                        ErrorState += "\n" + error;
                         break;
                 }
 
@@ -178,7 +178,6 @@ namespace BukiOffline.Services
                     return transformersExeArray.All(fileNames.Contains);
 
                 case Dependency.Tokenizers:
-                    //no new dependencies installed
                     return true;
                 case Dependency.Numpy:
                     return fileNames.Contains("f2py.exe");
