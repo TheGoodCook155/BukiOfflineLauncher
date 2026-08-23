@@ -286,9 +286,9 @@ namespace BukiOffline.ViewModels
         {
             FileDialog openFileDialog = new OpenFileDialog();
 
-            openFileDialog.Filter = "WAV files (*.wav)|*.wav";
+            openFileDialog.Filter = "WAV files (*.wav)|*.wav|MP3 files (*.mp3)|*.mp3";
 
-            openFileDialog.Title = "Одбери WAV фајл";
+            openFileDialog.Title = "Одбери WAV или mp3 фајл";
 
             bool? res = openFileDialog.ShowDialog();
 
