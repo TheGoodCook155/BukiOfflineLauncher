@@ -1,0 +1,35 @@
+{
+  "Core": "https://archive.org/download/buki-updated/buki-updated.zip",
+  "Python": "https://www.python.org/ftp/python/3.10.0/python-3.10.0-amd64.exe",
+  "Pip": [
+    "pip.exe",
+    "pip3.exe",
+    "pip3.10.exe"
+  ],
+  "Speechbrain": [
+    "f2py.exe",
+    "hf.exe",
+    "httpx.exe",
+    "huggingface-cli.exe",
+    "idna.exe",
+    "numpy-config.exe",
+    "tiny-agents.exe",
+    "tqdm.exe",
+    "convert-caffe2-to-onnx.exe",
+    "convert-onnx-to-caffe2.exe"
+  ],
+  "Transformers": [
+    "normalizer.exe",
+    "tiny-agents.exe",
+    "huggingface-cli.exe",
+    "hf.exe",
+    "transformers-cli.exe"
+  ],
+  "Librosa": [
+    "cffi-gen-src.exe",
+    "numba"
+  ],
+  "Torch": "torchrun.exe",
+  "Numpy": "f2py.exe",
+  "HuggingFaceHub": "huggingface-cli.exe"
+}

@@ -1,4 +1,5 @@
 ﻿using BukiOffline.Const;
+using Microsoft.Extensions.Configuration;
 using Serilog;
 using System.Diagnostics;
 using System.IO;
@@ -8,35 +9,50 @@ namespace BukiOffline.Services
     public class PrerequisitesChecker
     {
 
-        private string[] pipExeArray = { "pip.exe", "pip3.exe","pip3.10.exe" };
+        private string[] pipExeArray => configuration
+            .GetSection("Pip")
+            .Get<string[]>();
+
 
         //speechbrain
-        private string[] speechbrainExeArray = {"f2py.exe",
-                                                "hf.exe",
-                                                "httpx.exe",
-                                                "huggingface-cli.exe",
-                                                "idna.exe",
-                                                "numpy-config.exe",
-                                                "tiny-agents.exe",
-                                                "tqdm.exe",
-                                                "convert-caffe2-to-onnx.exe",
-                                                "convert-onnx-to-caffe2.exe" };
+        private string[] speechbrainExeArray => configuration
+            .GetSection("Speechbrain")
+            .Get<string[]>();
 
         //transformers
-        private string[] transformersExeArray = {"normalizer.exe",
-                                                "tiny-agents.exe",
-                                                "huggingface-cli.exe",
-                                                "hf.exe",
-                                                "transformers-cli.exe" };
+        private string[] transformersExeArray => configuration
+            .GetSection("Transformers")
+            .Get<string[]>();
+
         //librosa
-        private string[] librosaExeArray = { "cffi-gen-src.exe", "numba" };
+        private string[] librosaExeArray => configuration
+            .GetSection("Librosa")
+            .Get<string[]>();
+
+        //Torch
+        private string torch => configuration
+            .GetSection("Torch")
+            .Get<string>();
+
+        //Numpy
+        private string numpy => configuration
+            .GetSection("Numpy")
+            .Get<string>();
+
+        //HuggingFace Hub
+        private string huggingFaceHub => configuration
+            .GetSection("HuggingFaceHub")
+            .Get<string>();
 
         public string ErrorState { get; set; } = string.Empty;
 
         private ILogger logger;
 
-        public PrerequisitesChecker(ILogger logger)
+        private IConfiguration configuration;
+
+        public PrerequisitesChecker(IConfiguration configruation, ILogger logger)
         {
+            this.configuration = configruation;
             this.logger = logger.ForContext<PrerequisitesChecker>();
         }
 
@@ -169,7 +185,7 @@ namespace BukiOffline.Services
                     return pipExeArray.All(fileNames.Contains);
 
                 case Dependency.Torch:
-                    return fileNames.Contains("torchrun.exe");
+                    return fileNames.Contains(torch);
 
                 case Dependency.Speechbrain:
                     return speechbrainExeArray.All(fileNames.Contains);
@@ -180,13 +196,13 @@ namespace BukiOffline.Services
                 case Dependency.Tokenizers:
                     return true;
                 case Dependency.Numpy:
-                    return fileNames.Contains("f2py.exe");
+                    return fileNames.Contains(numpy);
                 case Dependency.Requests:
                     return true;
                 case Dependency.Librosa:
                     return librosaExeArray.All(fileNames.Contains);
                 case Dependency.HuggingFaceHub:
-                    return fileNames.Contains("huggingface-cli.exe");
+                    return fileNames.Contains(huggingFaceHub);
                 case Dependency.SentencePiece:
                     return false;
             }
@@ -202,7 +218,5 @@ namespace BukiOffline.Services
             }
             return true;
         }
-
-        
     }
 }

@@ -1,11 +1,11 @@
-﻿
-using BukiOffline.Const;
+﻿using BukiOffline.Const;
+using BukiOffline.Errors;
+using Microsoft.Extensions.Configuration;
 using Serilog;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Net.Http;
-using System.Printing;
 
 namespace BukiOffline.Services
 {
@@ -13,10 +13,15 @@ namespace BukiOffline.Services
     {
         private ILogger logger;
 
-        private readonly string pythonPath = "https://www.python.org/ftp/python/3.10.0/python-3.10.0-amd64.exe";
+        private IConfiguration configuration;
 
-        public PythonInstaller(ILogger logger)
+        private string pythonUrl => this.configuration
+            .GetSection("Python")
+            .Get<string>();
+
+        public PythonInstaller(IConfiguration configuration,ILogger logger)
         {
+            this.configuration = configuration;
             this.logger = logger.ForContext<PythonInstaller>();
         }
 
@@ -49,7 +54,7 @@ namespace BukiOffline.Services
                 logger.Error(processError);
 
             }
-            catch (Exception e) when (e.HResult == -2147467259)
+            catch (Exception e) when (e.HResult == (int) PythonError.NotFound)
             {
                 await DownloadPythonExecutable();
 
@@ -83,7 +88,7 @@ namespace BukiOffline.Services
                 logger.Information("Python installer exited with code {ExitCode}", process.ExitCode);
 
             }
-            catch (Win32Exception ex) when (ex.NativeErrorCode == 1223)
+            catch (Win32Exception ex) when (ex.NativeErrorCode == (int) RunAsError.AdminRightsNotGranted)
             {
                 logger.Warning("Python installation cancelled by the user.");
             }
@@ -94,7 +99,7 @@ namespace BukiOffline.Services
         private async Task DownloadPythonExecutable() 
         {
 
-            logger.Information("Downloading Python");
+            logger.Information($"Downloading Python from: {this.pythonUrl}");
 
             using HttpClient client = new HttpClient
             {
@@ -102,7 +107,7 @@ namespace BukiOffline.Services
             };
 
             using HttpResponseMessage response = await client.GetAsync(
-                pythonPath,
+                pythonUrl,
                 HttpCompletionOption.ResponseHeadersRead);
 
             response.EnsureSuccessStatusCode();

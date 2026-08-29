@@ -1,6 +1,7 @@
 ﻿
 using BukiOffline.Const;
 using BukiOffline.EventArguments;
+using Microsoft.Extensions.Configuration;
 using Serilog;
 using System.IO;
 using System.Net.Http;
@@ -10,22 +11,24 @@ namespace BukiOffline.Services
     public class DownloadCoreProjectService
     {
         private ILogger logger;
+        private IConfiguration configuration;
 
-        public DownloadCoreProjectService(ILogger logger)
+        public DownloadCoreProjectService(IConfiguration configuration, ILogger logger)
         {
             this.logger = logger.ForContext<DownloadCoreProjectService>();
+            this.configuration = configuration;
         }
 
         public event EventHandler<DownloadedContentEventArgs> OnDownloadedContentChanged;
         
         public async Task DownloadCoreProject()
         {
-            //https://archive.org/download/buki-updated/buki-updated.zip
+            string downloadUrl = configuration
+                .GetSection("Core")
+                .Get<string>();
 
-            logger.Information("Project download started");
-
-            const string downloadUrl = "https://archive.org/download/buki-updated/buki-updated.zip";
-
+            logger.Information($"Project download started from {downloadUrl}");
+            
             using HttpClient client = new HttpClient
             {
                 Timeout = Timeout.InfiniteTimeSpan

@@ -1,8 +1,7 @@
 ﻿using BukiOffline.Services;
 using BukiOffline.ViewModels;
+using Microsoft.Extensions.Configuration;
 using Serilog;
-using System.Configuration;
-using System.Data;
 using System.Windows;
 
 namespace BukiOffline
@@ -16,12 +15,18 @@ namespace BukiOffline
         private UnzipCoreProject unzipCoreProject;
         private DownloadCoreProjectService downloadCoreProjectService;
         private AppLauncher appLauncher;
+        private IConfiguration configuration;
         private void Init(ILogger logger) 
         {
-            this.pythonInstaller = new PythonInstaller(logger);
+            this.configuration = new ConfigurationBuilder()
+                                .SetBasePath(AppContext.BaseDirectory)
+                                .AddJsonFile("config.json", optional: false, reloadOnChange: true)
+                                .Build();
+            this.pythonInstaller = new PythonInstaller(configuration, logger);
             this.unzipCoreProject = new UnzipCoreProject(logger);
-            this.downloadCoreProjectService = new DownloadCoreProjectService(logger);
-            this.appLauncher = new AppLauncher(logger);   
+            this.downloadCoreProjectService = new DownloadCoreProjectService(configuration,logger);
+            this.appLauncher = new AppLauncher(logger);  
+        
         }
         protected override void OnStartup(StartupEventArgs e)
         {
@@ -37,7 +42,7 @@ namespace BukiOffline
 
             this.Init(logger);
 
-            var prerequisitesChecker = new PrerequisitesChecker(logger);
+            var prerequisitesChecker = new PrerequisitesChecker(configuration,logger);
 
             var mainViewModel = new MainViewModel(
                 prerequisitesChecker,
